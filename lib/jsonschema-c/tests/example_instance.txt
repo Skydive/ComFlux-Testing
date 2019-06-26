@@ -1,0 +1,17 @@
+[
+	{
+		"id": 16,
+		"name" : "ptest",
+		"tags": ["hi", "hi1"],
+		"dimensions": {
+			"length": 15,
+			"width": 10,
+			"height": 7
+		}
+	},
+	{
+		"id": 18,
+		"tags": ["hi", "hi1", "hi2", "hi3"],
+		"name":"pamine"
+	}
+]

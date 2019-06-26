@@ -1,0 +1,8 @@
+{
+    "properties": {
+        "dir": {
+            "type": "string"
+        }
+    },
+    "required": ["dir"]
+}
