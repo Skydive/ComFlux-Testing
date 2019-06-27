@@ -15,9 +15,7 @@
 #include <time.h>
 
 #include <stdlib.h>
-
 #include <signal.h>
-
 
 // NCURSES
 #include <curses.h>
@@ -26,14 +24,12 @@
 
 #define TIMESTEP 100000
 
-
 int oldcur;
 int x=0;
 int y=0;
 int dir;
 int mx, my;
 WINDOW* mainwin;
-
 
 void do_movement() {
 	switch(dir){
@@ -64,7 +60,7 @@ void do_movement() {
 }
 
 int tick() {
-	do_movement();	
+	do_movement();
 
 	getmaxyx(stdscr, my, mx);
 	if(y>=my)y=0;
@@ -74,14 +70,11 @@ int tick() {
 
 	clear();
 
-	//mvprintw(y, x, "o");
 	attron(COLOR_PAIR(1));
 	mvaddch(y, x, ' ');
 	attroff(COLOR_PAIR(1));
 
-	//wbkgd(mainwin, COLOR_PAIR(0));
-
- 	refresh();
+	refresh();
 }
 
 
@@ -94,15 +87,23 @@ void handler(int signum) {
 		case SIGINT:
 			if(mainwin != NULL) {
 				delwin(mainwin);
-    			endwin();
-    			refresh();
+				endwin();
+				refresh();
 			}
 			printf("Terminating process...\n");
 
 			exit(EXIT_SUCCESS);
 			break;
 	}
+}
 
+void color_background_callback(MESSAGE *msg) {
+	ENDPOINT *ep = msg->ep;
+
+	JSON* elem_msg = msg->_msg_json;
+	int value = json_get_int(elem_msg, "color_pair");
+
+	wbkgd(mainwin, COLOR_PAIR(value));
 }
 
 void movement_callback(MESSAGE *msg) {
@@ -120,14 +121,13 @@ int main(int argc, char *argv[]) {
 	if(argc < 3) {
 		printf("Usage: ./ncurses_block_screen.out [mw_cfg_path] sink_addr\n"
 				"\tmw_cfg_path		is the path to the config file for the middleware;\n"
-				"\t                 default improved_sink.json\n"
-				"\tsource_addr      is the address of the source we want to map to\n");
-
+				"\t									default improved_sink.json\n"
+				"\tsource_addr			is the address of the source we want to map to\n");
 		mw_cfg_path = "improved_sink.json";
-		src_addr=argv[1];
+		src_addr=argv[2];
 	} else {
-		src_addr=argv[1];
-		mw_cfg_path = argv[2];
+		src_addr=argv[2];
+		mw_cfg_path = argv[1];
 	}
 
 	int load_cfg_result = load_mw_config(mw_cfg_path);
@@ -152,12 +152,8 @@ int main(int argc, char *argv[]) {
 
 
 
-	ENDPOINT *ep_snk = endpoint_new_snk_file(
-		"ep_dir_sink", /* name */
-		"example snk endpoint", /* description */
-		"example_schemata/ncurses_dir_value.json", /* message schemata */
-		&movement_callback); /* handler for incoming messages */
-
+	ENDPOINT *ep_snk = endpoint_new_snk_file("ep_dir_sink", "example snk endpoint", "example_schemata/ncurses_dir_value.json", &movement_callback);
+	ENDPOINT *ep_bkclr_snk = endpoint_new_snk_file("ep_bkclr_sink", "snk endpoint color background", "example_schemata/ncurses_color_value.json", &color_background_callback);
 
 	Array *ep_query_array = array_new(ELEM_TYPE_STR);
 	array_add(ep_query_array, "ep_name = 'ep_dir_src'");
@@ -174,40 +170,44 @@ int main(int argc, char *argv[]) {
 	getch();
 
 	struct itimerval it;
-    timerclear(&it.it_interval);
-    timerclear(&it.it_value);
-    it.it_interval.tv_usec = TIMESTEP;
-    it.it_value.tv_usec    = TIMESTEP;
-    setitimer(ITIMER_REAL, &it, NULL);
+	timerclear(&it.it_interval);
+	timerclear(&it.it_value);
+	it.it_interval.tv_usec = TIMESTEP;
+	it.it_value.tv_usec		 = TIMESTEP;
+	setitimer(ITIMER_REAL, &it, NULL);
 
 	struct sigaction sa;
-    sa.sa_handler = handler;
-    sa.sa_flags   = 0;
-    sigemptyset(&sa.sa_mask);
-    sigaction(SIGTERM, &sa, NULL);
-    sigaction(SIGINT,  &sa, NULL);
-    sigaction(SIGALRM, &sa, NULL);
-    sa.sa_handler = SIG_IGN;
-    sigaction(SIGTSTP, &sa, NULL);
+	sa.sa_handler = handler;
+	sa.sa_flags		= 0;
+	sigemptyset(&sa.sa_mask);
+	sigaction(SIGTERM, &sa, NULL);
+	sigaction(SIGINT,	 &sa, NULL);
+	sigaction(SIGALRM, &sa, NULL);
+	sa.sa_handler = SIG_IGN;
+	sigaction(SIGTSTP, &sa, NULL);
 
 	if((mainwin = initscr()) == NULL) {
 		fprintf(stderr, "Error initialising ncurses\n");
 		exit(EXIT_FAILURE);
-	}	
+	}
 	noecho();
 	oldcur = curs_set(0);
 	keypad(mainwin, TRUE);
-	
+
 	start_color();
 	init_pair(1, COLOR_WHITE, COLOR_GREEN);
-
+	init_pair(2, COLOR_RED, COLOR_BLACK);
+	init_pair(3, COLOR_CYAN, COLOR_CYAN);
+	init_pair(4, COLOR_YELLOW, COLOR_YELLOW);
+	init_pair(5, COLOR_BLACK, COLOR_RED);
+	init_pair(6, COLOR_RED, COLOR_BLUE);
 
 	// Initial position
 	getmaxyx(stdscr, my, mx);
 	x = floor(mx/2);
 	y = floor(my/2);
 
-	
+
 	int ch;
 	while(1) {
 		int key = getch();

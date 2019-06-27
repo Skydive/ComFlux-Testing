@@ -1,0 +1,8 @@
+{
+    "properties": {
+        "color": {
+            "type": "string"
+        }
+    },
+    "required": ["dir"]
+}

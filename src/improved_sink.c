@@ -46,10 +46,10 @@ int main(int argc, char *argv[])
 				"\tsource_addr      is the address of the source we want to map to\n");
 
 		mw_cfg_path = "improved_sink.json";
-		src_addr=argv[1];
+		src_addr=argv[2];
 	} else {
-		src_addr=argv[1];
-		mw_cfg_path = argv[2];
+		src_addr=argv[2];
+		mw_cfg_path = argv[1];
 	}
 
 	/* load and apply configuration */

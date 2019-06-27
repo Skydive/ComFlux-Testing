@@ -38,11 +38,11 @@ int main(int argc, char* argv[])
 			   "\tsink_addr       is the address of the response component\n");
 
 		mw_cfg_path = "mw_cfg.json";
-		src_addr = argv[1];
+		src_addr = argv[2];
 
 	} else {
-		mw_cfg_path = argv[2];
-		src_addr = argv[1];
+		src_addr = argv[2];
+		mw_cfg_path = argv[1];
 	}
 
 	/* load and apply configuration */

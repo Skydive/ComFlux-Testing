@@ -8,7 +8,7 @@ SOURCE_DIR := src
 OBJECT_DIR := obj
 BINARY_DIR := bin
 
-CFLAGS := $(INCLUDE_DIRS) 
+CFLAGS := $(INCLUDE_DIRS) -g 
 LFLAGS := -lpthread -ldl -ljson-c -lmiddleware_api -lmiddleware_utils -lncursesw
 
 C_FILES := $(wildcard $(SOURCE_DIR)/*.c)
