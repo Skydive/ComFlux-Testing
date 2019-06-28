@@ -81,11 +81,6 @@ int main(int argc, char *argv[])
 	int conn;
 	char* metadata;
 
-
-
-
-
-
 	/* forever: send data */
 	while(1)
 	{

@@ -155,7 +155,7 @@ int main(int argc, char *argv[]) {
 	ENDPOINT *ep_snk = endpoint_new_snk_file("ep_dir_sink", "example snk endpoint", "example_schemata/ncurses_dir_value.json", &movement_callback);
 	ENDPOINT *ep_bkclr_snk = endpoint_new_snk_file("ep_bkclr_sink", "snk endpoint color background", "example_schemata/ncurses_color_value.json", &color_background_callback);
 
-	Array *ep_query_array = array_new(ELEM_TYPE_STR);
+	/*Array *ep_query_array = array_new(ELEM_TYPE_STR);
 	array_add(ep_query_array, "ep_name = 'ep_dir_src'");
 	JSON *ep_query_json = json_new(NULL);
 	json_set_array(ep_query_json, NULL, ep_query_array);
@@ -163,7 +163,7 @@ int main(int argc, char *argv[]) {
 	char* cpt_query_str = "";
 
 	int map_result = endpoint_map_to(ep_snk, src_addr, ep_query_str, cpt_query_str);
-	printf("Map result: %d \n", map_result);
+	printf("Map result: %d \n", map_result);*/
 
 	struct itimerval it;
 	timerclear(&it.it_interval);

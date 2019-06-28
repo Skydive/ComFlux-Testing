@@ -31,7 +31,7 @@ typedef struct ep_node {
 } ep_node_t;
 
 bool ep_node_push_back(ep_node_t* head, ENDPOINT* val) {
-	node_t* cur = head;
+	ep_node_t* cur = head;
 	while(cur->next != NULL)
 		cur = cur->next;
 	cur->next = malloc(sizeof(ep_node_t));
@@ -43,7 +43,7 @@ bool ep_node_push_back(ep_node_t* head, ENDPOINT* val) {
 }
 
 bool ep_node_push_front(ep_node_t** head, ENDPOINT* val) {
-	node_t* new_node;
+	ep_node_t* new_node;
 	new_node = malloc(sizeof(ep_node_t));
 	if(new_node == NULL)
 		return false;
@@ -66,7 +66,7 @@ bool ep_node_remove_val(ep_node_t** head, ENDPOINT* val) {
 		head = &(*head)->next;
 		if(*head==NULL)return false;
 	}
-	*head=entry->next;
+	*head=(*head)->next;
 	return true;
 }
 int ep_node_len(ep_node_t* head) {
@@ -102,7 +102,7 @@ void msg_received_callback(MESSAGE *msg) {
 
 	JSON* elem_msg = msg->_msg_json;
 	char* uid = json_get_str(elem_msg, "uid");
-	time_t utime = json_get_long(elem_msg, "utime");
+	time_t utime = json_get_int(elem_msg, "utime");
 	char* src_address = json_get_str(elem_msg, "src_address");
 	char* nickname = json_get_str(elem_msg, "nickname");
 	char* msg = json_get_str(elem_msg, "text");
@@ -166,11 +166,11 @@ void request_sink_assign(MESSAGE* msg) {
 }
 
 void handler(int signum) {
+	time_t cur_time = time(NULL);
+	static time_t last_signal = cur_time;
+
 	switch(signum) {
 	case SIGALRM:
-		time_t cur_time = time(NULL);
-		static time_t last_signal = cur_time;
-
 		if(difftime(cur_time,last_signal) > 5.0) {
 			printf("5 seconds...\n");
 			last_signal = time(NULL);
