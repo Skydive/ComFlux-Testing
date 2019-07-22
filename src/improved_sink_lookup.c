@@ -13,6 +13,11 @@
 #include <unistd.h>
 
 
+void exit_handler(int s) {
+	printf("Terminating process...");
+	exit(1);
+}
+
 void print_callback(MESSAGE *msg) {
 	ENDPOINT *ep = msg->ep;
 
@@ -32,16 +37,16 @@ int main(int argc, char *argv[])
 	char *mw_cfg_path = NULL;
 	char *src_addr = NULL;
 
-	if(argc < 3) {
+	if(argc < 2) {
 		printf("Usage: ./simple_source [mw_cfg_path] sink_addr\n"
 				"\tmw_cfg_path		is the path to the config file for the middleware;\n"
 				"\t                 default improved_sink.json\n"
 				"\tsource_addr      is the address of the source we want to map to\n");
 
 		mw_cfg_path = "improved_sink.json";
-		src_addr=argv[2];
+		//src_addr=argv[2];
 	} else {
-		src_addr=argv[2];
+		//src_addr=argv[2];
 		mw_cfg_path = argv[1];
 	}
 
@@ -85,10 +90,11 @@ int main(int argc, char *argv[])
 
 
 	/* map according to the query */
-	//endpoint_map_lookup(ep_snk, ep_query_str, cpt_query_str, 10);
-	int map_result = endpoint_map_to(ep_snk, src_addr, ep_query_str, cpt_query_str);
-	printf("Map result: %d \n", map_result);
+	endpoint_map_lookup(ep_snk, ep_query_str, cpt_query_str, 10);
+	//int map_result = endpoint_map_to(ep_snk, src_addr, ep_query_str, cpt_query_str);
+	//printf("Map result: %d \n", map_result);
 
+	//keeps the sink alive
 	while(1)
 		sleep(1);
 

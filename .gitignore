@@ -1,2 +1,3 @@
 bin/.dummy_tmp/*
 .#*
+*.out

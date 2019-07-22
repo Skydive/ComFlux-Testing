@@ -25,6 +25,9 @@ void print_callback(MESSAGE *msg) {
 	printf("Sink ep handler:\n "
 		"\t-- number: %d \n "
 		"\t-- string: %s\n", value, datetime);
+
+	//NO SEGFAULT
+	//endpoint_unmap_all(ep);
 }
 
 int main(int argc, char *argv[])
@@ -89,8 +92,12 @@ int main(int argc, char *argv[])
 	int map_result = endpoint_map_to(ep_snk, src_addr, ep_query_str, cpt_query_str);
 	printf("Map result: %d \n", map_result);
 
+
 	while(1)
 		sleep(1);
 
+
+	// NO SEGFAULT
+	// endpoint_unmap_all(ep_snk);
 	return 0;
 }

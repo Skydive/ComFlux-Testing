@@ -16,15 +16,7 @@
 
 #include <stdlib.h>
 
-#include <signal.h>
-
-void exit_handler(int s) {
-	printf("Terminating process...");
-	exit(1);
-}
-
-int main(int argc, char *argv[])
-{	
+int main(int argc, char *argv[]) {
 	char *mw_cfg_path = NULL;
 	if(argc < 2) {
 		printf("Usage: ./simple_source mw_cfg_path\n"
@@ -45,11 +37,6 @@ int main(int argc, char *argv[])
 		config_get_app_log_lvl(), /* log level for app */
 		1); /* use sockpair, only available option atm */
 
-
-	printf("Registering exit handler...\n");
-	signal(SIGINT, exit_handler);
-
-
 	printf("Initialising core: %s\n", app_name!=NULL?"ok":"error");
 	printf("\tApp name: %s\n", app_name);
 
@@ -57,12 +44,21 @@ int main(int argc, char *argv[])
 	load_cfg_result = config_load_com_libs();
 	printf("Load coms module result: %s\n", load_cfg_result==0?"ok":"error");
 
-	
+	JSON* manifest = json_new(NULL);
+	json_set_str(manifest, "app_name", app_name);
+	json_set_str(manifest, "author", "khalid");
+	mw_add_manifest(json_to_str(manifest));
+
 	/* Declare and register endpoints */
 	ENDPOINT *ep_src = endpoint_new_src_file(
 						"ep_source",
 						"example src endpoint",
 						"example_schemata/datetime_value.json");
+
+	printf("\nAdding RDC...\n");
+	mw_add_rdc("comtcp", "127.0.0.1:1508");
+	mw_register_rdcs();
+
 
 	/* seeding random number generator */
 	srand(time(NULL));

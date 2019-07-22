@@ -5,20 +5,12 @@
  *      Author: Raluca Diaconu
  */
 
-#include <signal.h>
-
 #include <endpoint.h>
 #include <middleware.h>
 #include <load_mw_config.h>
 
 #include <stdio.h>
 #include <unistd.h>
-
-
-void exit_handler(int s) {
-	printf("Terminating process...");
-	exit(1);
-}
 
 void print_callback(MESSAGE *msg) {
 	ENDPOINT *ep = msg->ep;
@@ -60,9 +52,6 @@ int main(int argc, char *argv[]) {
 	char* app_name = mw_init("sink_cpt", config_get_core_log_lvl(), 1);
 	printf("Initialising core: %s\n", app_name!=NULL?"ok":"error");
 	printf("\tApp name: %s\n", app_name);
-
-	printf("Registering exit handler...\n");
-	signal(SIGINT, exit_handler);
 
 	/* load coms modules for the core */
 	load_cfg_result = config_load_com_libs();

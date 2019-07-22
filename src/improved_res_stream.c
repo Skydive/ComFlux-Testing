@@ -37,10 +37,6 @@ void print_callback(MESSAGE* msg) {
 	message = json_to_str(msg_json);
 	endpoint_send_response(ep_resp, msg->msg_id, message);
 
-	// CAUSES SEGFAULT:
-	// endpoint_unmap_all(ep_resp);
-
-
 	free(message);
 	json_free(msg_json);
 }

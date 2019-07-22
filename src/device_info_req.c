@@ -7,11 +7,6 @@
 #include <time.h>
 #include <signal.h>
 
-void exit_handler(int s) {
-	printf("Terminating process...");
-	exit(1);
-}
-
 void print_callback(MESSAGE *msg)
 {
 	ENDPOINT *ep = msg->ep;
@@ -22,7 +17,7 @@ void print_callback(MESSAGE *msg)
 	// char* datetime = json_get_str(elem_msg, "datetime");
 
 	/* process the extracted values */
-	printf(json_to_str(msg->_msg_json));
+	printf("REQUEST CALLBACK: %s\n", json_to_str(elem_msg));
 	printf("\n");
 }
 
@@ -55,10 +50,6 @@ int main(int argc, char* argv[])
 	printf("Initialising core: %s\n", app_name!=NULL?"ok":"error");
 	printf("\tApp name: %s\n", app_name);
 
-	printf("Registering exit handler...\n");
-	signal(SIGINT, exit_handler);
-
-
 	/* load coms modules for the core */
 	load_cfg_result = config_load_com_libs();
 	printf("Load coms module result: %s\n", load_cfg_result==0?"ok":"error");
@@ -67,7 +58,7 @@ int main(int argc, char* argv[])
 	ENDPOINT* ep_req = endpoint_new_req_file(
 			"ep_req",
 			"example req endpoint",
-			"example_schemata/empty.json", /* request schemata */
+			"example_schemata/datetime_value.json", /* request schemata */
 			"example_schemata/datetime_value.json", /* response schemata */
 			&print_callback);
 
@@ -93,23 +84,26 @@ int main(int argc, char* argv[])
 
 	int i = 0;
 	while (i < 1000)
-	{
-		i++;
-		sleep(3);
+		{
+			i++;
+			sleep(3);
 
-		time ( &rawtime );
-		timeinfo = localtime ( &rawtime );
+			time ( &rawtime );
+			timeinfo = localtime ( &rawtime );
 
-		msg_json = json_new(NULL);
-		message = json_to_str(msg_json);
-		msgid = endpoint_send_request(ep_req, message);
+			msg_json = json_new(NULL);
+			json_set_int(msg_json, "value", rand() % 10);
+			json_set_str(msg_json, "datetime", asctime(timeinfo));
 
-		printf("Request %s: \n%s\n", msgid, message);
+			message = json_to_str(msg_json);
+			printf("ENDPOINT SEND REQUEST!!!!\n");
+			msgid = endpoint_send_request(ep_req, message);
+			printf("Request %s: \n%s\n", msgid, message);
 
-		free(message);
-		free(msgid);
-        json_free(msg_json);
-	}
 
+			free(message);
+			free(msgid);
+			json_free(msg_json);
+		}
 	return 0;
 }

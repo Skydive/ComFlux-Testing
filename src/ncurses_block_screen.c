@@ -15,12 +15,13 @@
 #include <time.h>
 
 #include <stdlib.h>
-#include <signal.h>
 
 // NCURSES
 #include <curses.h>
 #include <sys/time.h>
 #include <math.h>
+
+#include <signal.h>
 
 #define TIMESTEP 100000
 
@@ -91,7 +92,7 @@ void handler(int signum) {
 				refresh();
 			}
 			printf("Terminating process...\n");
-
+			mw_terminate_core();
 			exit(EXIT_SUCCESS);
 			break;
 	}
@@ -149,8 +150,6 @@ int main(int argc, char *argv[]) {
 	// mw_add_manifest(json_to_str(manifest));
 	// mw_add_rdc("comtcp", "127.0.0.1:1508");
 	// mw_register_rdcs();
-
-
 
 	ENDPOINT *ep_snk = endpoint_new_snk_file("ep_dir_sink", "example snk endpoint", "example_schemata/ncurses_dir_value.json", &movement_callback);
 	ENDPOINT *ep_bkclr_snk = endpoint_new_snk_file("ep_bkclr_sink", "snk endpoint color background", "example_schemata/ncurses_color_value.json", &color_background_callback);

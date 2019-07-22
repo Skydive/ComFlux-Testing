@@ -15,7 +15,6 @@
 #include <time.h>
 
 #include <stdlib.h>
-#include <signal.h>
 
 // NCURSES
 #include <curses.h>
