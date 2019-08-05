@@ -7,7 +7,7 @@
 #include <time.h>
 #include <signal.h>
 
-void print_callback(MESSAGE *msg)
+void print_callback_a(MESSAGE *msg)
 {
 	ENDPOINT *ep = msg->ep;
 
@@ -17,8 +17,20 @@ void print_callback(MESSAGE *msg)
 	// char* datetime = json_get_str(elem_msg, "datetime");
 
 	/* process the extracted values */
-	printf("REQUEST CALLBACK: %s\n", json_to_str(elem_msg));
-	printf("\n");
+	printf("A: REQUEST CALLBACK: %s\n", json_to_str(elem_msg));
+}
+
+void print_callback_b(MESSAGE *msg)
+{
+	ENDPOINT *ep = msg->ep;
+
+	/* parsing the message and extracting the values */
+	JSON* elem_msg = msg->_msg_json;
+	// int value = json_get_int(elem_msg, "value");
+	// char* datetime = json_get_str(elem_msg, "datetime");
+
+	/* process the extracted values */
+	printf("B: REQUEST CALLBACK: %s\n", json_to_str(elem_msg));
 }
 
 int main(int argc, char* argv[])
@@ -55,24 +67,22 @@ int main(int argc, char* argv[])
 	printf("Load coms module result: %s\n", load_cfg_result==0?"ok":"error");
 
 	/* Declare and register endpoints */
-	ENDPOINT* ep_req = endpoint_new_req_file(
-			"ep_req",
+	ENDPOINT* ep_req_a = endpoint_new_req_file(
+			"ep_req_a",
 			"example req endpoint",
 			"example_schemata/datetime_value.json", /* request schemata */
 			"example_schemata/datetime_value.json", /* response schemata */
-			&print_callback);
+			&print_callback_a);
+	ENDPOINT* ep_req_b = endpoint_new_req_file(
+			"ep_req_b",
+			"example req endpoint",
+			"example_schemata/datetime_value.json", /* request schemata */
+			"example_schemata/datetime_value.json", /* response schemata */
+			&print_callback_b);
 
-	/* build the query */
-	Array* ep_query_array = array_new(ELEM_TYPE_STR);
-	array_add(ep_query_array, "ep_name = 'ep_response'");
-	JSON* ep_query_json = json_new(NULL);
-	json_set_array(ep_query_json, NULL, ep_query_array);
-	char* ep_query_str = json_to_str(ep_query_json);
-	char* cpt_query_str = "";
-
-	printf("\n\nQuery string: *%s*\n\n", ep_query_str);
-	/* map according to the query */
-	int map_result = endpoint_map_to(ep_req, src_addr, ep_query_str, cpt_query_str);
+	int map_result = endpoint_map_to(ep_req_a, src_addr, "[ \"ep_name = 'ep_resp_a'\" ]", "");
+	printf("Map result: %d \n", map_result);
+	map_result = endpoint_map_to(ep_req_b, src_addr, "[ \"ep_name = 'ep_resp_b'\" ]", "");
 	printf("Map result: %d \n", map_result);
 
 	time_t rawtime;
@@ -84,9 +94,8 @@ int main(int argc, char* argv[])
 
 	int i = 0;
 	while (i < 1000)
-		{
+	{
 			i++;
-			sleep(10);
 
 			time ( &rawtime );
 			timeinfo = localtime ( &rawtime );
@@ -96,14 +105,36 @@ int main(int argc, char* argv[])
 			json_set_str(msg_json, "datetime", asctime(timeinfo));
 
 			message = json_to_str(msg_json);
-			printf("ENDPOINT SEND REQUEST!!!!\n");
-			msgid = endpoint_send_request(ep_req, message);
-			printf("Request %s: \n%s\n", msgid, message);
-
-
-			free(message);
+			msgid = endpoint_send_request(ep_req_a, message);
+			printf("A: Request %s: %s\n", msgid, message);
 			free(msgid);
+			free(message);
+
+			//TODO: SLEEP REQUIRED. (3 secs - 0.5s not enough)
+			//TODO: Fix double free/segfault caused by FIXING merging messages w/o sleep
+			//TODO: Is this problem is independent of the queue-fix? But we only have one thread writing to it, one reading from it.
+			//TODO: !?!?
+			sleep(3);
+
+			message = json_to_str(msg_json);
+			msgid = endpoint_send_request(ep_req_b, message);
+			printf("B: Request %s: %s\n", msgid, message);
+			free(msgid);
+			free(message);
+
+			/*MESSAGE* msg_a = endpoint_send_request_blocking(ep_req_a, message);
+			printf("A: Request %s: %s", msg_a->msg_id, message);
+			message_free(msg_a);
+
+			// PROBLEM: Cannot block to wait for response on a non-queueing endpoint
+
+			MESSAGE* msg_b = endpoint_send_request_blocking(ep_req_b, message);
+			printf("B: Request %s: %s", msg_b->msg_id, message);
+			message_free(msg_a);*/
+
 			json_free(msg_json);
-		}
+
+			sleep(3);
+	}
 	return 0;
 }

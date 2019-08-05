@@ -37,9 +37,14 @@ void print_callback(MESSAGE* msg) {
 	message = json_to_str(msg_json);
 	endpoint_send_response(ep_resp, msg->msg_id, message);
 
-	// CAUSES SEGFAULT:
-	// endpoint_unmap_all(ep_resp);
+	//Array* connections = ep_get_all_connections(ep_resp);
+	//printf("Number of connections = %d\n", array_size(connections));
+	//array_free(connections);
 
+
+	//printf("SLEEPING WOW SLEEPING\n\n");
+	//sleep(10);
+	endpoint_unmap_all(ep_resp);
 
 	free(message);
 	json_free(msg_json);
