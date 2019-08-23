@@ -112,8 +112,8 @@ int main(int argc, char *argv[]) {
 
 			array_free(connections);
 		}
-		sleep(3);
 	}
 
+	sleep(3);
 	return 0;
 }

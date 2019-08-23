@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
 			//TODO: Fix double free/segfault caused by FIXING merging messages w/o sleep
 			//TODO: Is this problem is independent of the queue-fix? But we only have one thread writing to it, one reading from it.
 			//TODO: !?!?
-			sleep(3);
+			///sleep(3);
 
 			message = json_to_str(msg_json);
 			msgid = endpoint_send_request(ep_req_b, message);
@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
 
 			json_free(msg_json);
 
-			sleep(3);
+			//sleep(3);
 	}
 	return 0;
 }

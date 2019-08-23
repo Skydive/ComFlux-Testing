@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <time.h>
+#include <math.h>
 
 #include <stdlib.h>
 
@@ -55,11 +56,6 @@ int main(int argc, char *argv[]) {
 						"example src endpoint",
 						"example_schemata/datetime_value.json");
 
-	printf("\nAdding RDC...\n");
-	mw_add_rdc("comtcp", "127.0.0.1:1508");
-	mw_register_rdcs();
-
-
 	/* seeding random number generator */
 	srand(time(NULL));
 
@@ -70,17 +66,11 @@ int main(int argc, char *argv[]) {
 	JSON* msg_json;
 	char* message;
 
-	Array* connections = NULL;
-	int i;
-	JSON* conn_json;
-	char* module;
-	int conn;
-	char* metadata;
 
 	/* forever: send data */
 	while(1)
 	{
-		sleep(3);
+		usleep(round(10*1000000));
 
 		time(&rawtime);
 		timeinfo = localtime(&rawtime);
@@ -97,18 +87,24 @@ int main(int argc, char *argv[]) {
 		json_free(msg_json);
 
 		/* get and mapped components */
-		connections = ep_get_all_connections(ep_src);
+		Array* connections = ep_get_all_connections(ep_src);
 		printf("Number of connections = %d\n", array_size(connections));
 
-		for (i=0; i<array_size(connections); i++)
+		for (int i=0; i<array_size(connections); i++)
 		{
+			JSON* conn_json;
+			char* module;
+			int conn;
+			//char* metadata;
+
 			conn_json = array_get(connections, i);
 			module = json_get_str(conn_json, "module");
 			conn = json_get_int(conn_json, "conn");
-			metadata = mw_get_remote_metdata(module, conn);
-			printf("\t#%d: connection %d, module %s, manifest: %s\n",
-							i, conn, module, metadata);
-			free(metadata);
+			printf("TESTING %s\n", json_to_str(conn_json));
+			//metadata = mw_get_remote_metdata(module, conn);
+			printf("\t#%d: connection %d, module %s\n",
+						 i, conn, module/*, metadata*/);
+			//free(metadata);
 			free(module);
 			json_free(conn_json);
 		}
